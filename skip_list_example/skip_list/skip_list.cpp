@@ -3,14 +3,16 @@
  * @version: 
  * @Author: tylerytr
  * @Date: 2023-03-27 14:32:19
- * @LastEditTime: 2023-03-27 17:07:04
+ * @LastEditTime: 2023-03-27 17:35:23
  * @LastEditors: tylerytr
  * @FilePath: /CPP_example/skip_list_example/skip_list/skip_list.cpp
  * @Email:601576661@qq.com
  * @Copyright (c) 2023 by tyleryin, All Rights Reserved. 
 *******************************************************************/
-
+//目前存在内存泄露问题，需要修改析构和deletenode函数
 #include "skip_list.h"
+using std::cout;
+using std::endl;
 //初始化
 template<class T>SkipList<T>::SkipList(int maxLevel,T iniValue):maxLevel(maxLevel){
     head=new SkipNode<T>(minInt,iniValue,maxLevel);
@@ -165,6 +167,7 @@ template<class T> SkipNode<T>* SkipList<T>::deletenode(int key){
             cout << "This node " << key << " has been deleted from level " << i << endl;
             
         }
+       // delete node;
         return head;
     }
 }

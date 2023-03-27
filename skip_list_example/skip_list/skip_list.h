@@ -17,8 +17,7 @@
 #include <vector>
 #include <stdexcept>
 #include <limits>
-using std::cout;
-using std::endl;
+
 template<class T=int>
 class SkipList{
     public:
