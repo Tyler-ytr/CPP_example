@@ -11,7 +11,7 @@ int main(){
 		l.insert(i, i);
 	}
 
-	l.printList();
+	//l.printList();
     return 0;
 
     ;

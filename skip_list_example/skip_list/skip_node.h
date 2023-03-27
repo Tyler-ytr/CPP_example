@@ -19,3 +19,5 @@ struct SkipNode{
 
     SkipNode(int k,T v,int level);
 };
+
+#include "skip_node.tpp"

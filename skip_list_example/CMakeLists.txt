@@ -15,4 +15,5 @@ add_subdirectory(skip_list)
 add_executable(Demo main.cpp)
 
 # 添加链接库
-target_link_libraries(Demo SkipList)
+# target_link_libraries(Demo SkipList)
+target_include_directories(Demo PUBLIC SkipListHeaders)

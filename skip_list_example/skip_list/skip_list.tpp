@@ -3,13 +3,14 @@
  * @version: 
  * @Author: tylerytr
  * @Date: 2023-03-27 14:32:19
- * @LastEditTime: 2023-03-27 17:35:23
+ * @LastEditTime: 2023-03-27 18:45:06
  * @LastEditors: tylerytr
  * @FilePath: /CPP_example/skip_list_example/skip_list/skip_list.cpp
  * @Email:601576661@qq.com
  * @Copyright (c) 2023 by tyleryin, All Rights Reserved. 
 *******************************************************************/
 //目前存在内存泄露问题，需要修改析构和deletenode函数
+#pragma once
 #include "skip_list.h"
 using std::cout;
 using std::endl;
@@ -199,4 +200,4 @@ template<class T> void SkipList<T>::printList(){
     }
     
 }
-template class SkipList<int>;
+//template class SkipList<int>;

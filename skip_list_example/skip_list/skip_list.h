@@ -3,7 +3,7 @@
  * @version: 
  * @Author: tylerytr
  * @Date: 2023-03-27 14:32:09
- * @LastEditTime: 2023-03-27 17:15:24
+ * @LastEditTime: 2023-03-27 18:47:04
  * @LastEditors: tylerytr
  * @FilePath: /CPP_example/skip_list_example/skip_list/skip_list.h
  * @Email:601576661@qq.com
@@ -53,3 +53,4 @@ class SkipList{
         //找到当前列表或者node的最大层数
         int nodeLevel(std::vector<SkipNode<T>*> next);
 };
+#include "skip_list.tpp"
