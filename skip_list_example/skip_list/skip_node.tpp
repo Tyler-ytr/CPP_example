@@ -1,3 +1,14 @@
+/*
+ * @Descripttion: 
+ * @version: 
+ * @Author: tylerytr
+ * @Date: 2023-03-27 15:19:18
+ * @LastEditTime: 2023-03-31 13:21:14
+ * @LastEditors: tylerytr
+ * @FilePath: /CPP_example/skip_list_example/skip_list/skip_node.tpp
+ * Email:601576661@qq.com
+ * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
+ */
 //构造函数初始化
 #pragma once
 #include "skip_node.h"
