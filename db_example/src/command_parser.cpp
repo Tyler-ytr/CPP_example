@@ -3,9 +3,9 @@
  * @version: 
  * @Author: tylerytr
  * @Date: 2023-03-31 16:12:57
- * @LastEditTime: 2023-03-31 21:29:03
+ * @LastEditTime: 2023-03-31 21:50:10
  * @LastEditors: tylerytr
- * @FilePath: /db_example/src/commandparser.cpp
+ * @FilePath: /db_example/src/command_parser.cpp
  * @Email:601576661@qq.com
  * @Copyright (c) 2023 by tyleryin, All Rights Reserved. 
 *******************************************************************/
@@ -60,7 +60,7 @@ bool safeAtoi(int &result,const string&str){
     return true;
 }
 ParserResult CommandParser::command(const std::string& command){
-    if(command.size()>256){
+    if(command.size()>255){
         return ParserResult::STRING_TOO_LONG;
     }
 
@@ -99,8 +99,11 @@ ParserResult CommandParser::command(const std::string& command){
         if(state.row.id<0){
             return ParserResult::BAD_ID;
         }
-
+        if(commandList[3].size()>32){
+            return ParserResult::STRING_TOO_LONG;
+        }
         state.row.username=commandList[3];
+
         if(!safeAtoi(state.row.age,commandList[4])){
             return ParserResult::SYBTAX_ERROR;
         }
@@ -115,7 +118,11 @@ ParserResult CommandParser::command(const std::string& command){
         if(commandList[1]!="db"){
             return ParserResult::SYBTAX_ERROR;
         }
+        if(commandList[2].size()>32){
+            return ParserResult::STRING_TOO_LONG;
+        }
         state.row.username=commandList[2];
+
         if(!safeAtoi(state.row.age,commandList[3])){
             return ParserResult::SYBTAX_ERROR;
         }
