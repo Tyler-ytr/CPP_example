@@ -35,8 +35,14 @@ int main(){
             if(p.get_row(i)!=nullptr){
                 cout<<"error"<<endl;
             }
+            if(p.update_row(i,99,names[i],test[i])){
+                cout<<"error"<<endl;
+            }
         }else{
             if(p.get_row(i)==nullptr){
+                cout<<"error"<<endl;
+            }
+            if(!p.update_row(i,99,names[i],test[i])){
                 cout<<"error"<<endl;
             }
         }
