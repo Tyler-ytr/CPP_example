@@ -1,6 +1,13 @@
 #include "bit_map.h"
 #include <iostream>
 using namespace std;
+struct row{
+    int id;
+    int age;
+    char username[32];
+    char email[211];
+    int exist;
+};
 int main(){
     BitMap bm(66666);
     for(int i=0;i<=66666;i++){
@@ -21,6 +28,7 @@ int main(){
     }
 
     cout<<"success"<<endl;
+    cout<<sizeof(row)<<endl;
 
 
     return 0;
