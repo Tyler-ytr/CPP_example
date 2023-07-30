@@ -1,3 +1,12 @@
+<!--
+ * @Author: tylerytr
+ * @Date: 2023-04-07 15:57:31
+ * @LastEditors: tylerytr
+ * @LastEditTime: 2023-07-30 16:56:55
+ * @FilePath: /CPP_example/multithread_example/README.md
+ * Email:601576661@qq.com
+ * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
+-->
 # C++多线程
 ## C++内存模型
 ### 关系术语
@@ -48,3 +57,11 @@ synchronizes-with关系强调的是变量被修改之后的传播关系（propag
         其中第二行代码的执行结果依赖于第一行代码的执行结果，此时称这两行代码之间的关系为“carry-a-dependency ”。
     - C++中引入的memory_order_consume内存模型就针对这类代码间有明确的依赖关系的语句限制其先后顺序。相当于对于有依赖关系的部分是有先后顺序的(如同acquire)，但是对于没有依赖关系的部分是不保证先后顺序的。
 6. Relaxed:允许乱序，只保证操作原子性；
+
+
+
+## C++ Thread库
+TOBEDONE 
+### 参考资料
+1. [C++并发编程](https://paul.pub/cpp-concurrency/)
+2. [现代C++教程/并行并发](https://changkun.de/modern-cpp/zh-cn/07-thread/index.html)
