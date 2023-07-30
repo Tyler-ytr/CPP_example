@@ -90,8 +90,10 @@ class ThreadPool{
         auto submit(F &&f, Args &&...args) -> std::future<decltype(f(args...))>
         {
             // Create a function with bounded parameter ready to execute
+            //这里通过bind可以把输入的参数“预留”在func里面
             std::function<decltype(f(args...))()> func = std::bind(std::forward<F>(f), std::forward<Args>(args)...);// 连接函数和参数定义，特殊函数类型，避免左右值错误
             // Encapsulate it into a shared pointer in order to be able to copy construct
+            //由于上一步"预留"了参数，这里packaged_task包装的函数的返回值是decltype(f(args...))，入参是();
             auto task_ptr = std::make_shared<std::packaged_task<decltype(f(args...))()>>(func);
             // Warp packaged task into void function
             std::function<void()> warpper_func = [task_ptr]()
