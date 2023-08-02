@@ -66,8 +66,50 @@ void test2(){
     //d2.g(); 不明确 报错
 }
 
+//菱形继承
+
+class Super_3{
+public:
+    int a;
+    int b;
+public:
+    virtual void f() { a=0; }
+    virtual void g() { b=0; }
+    virtual void h() { ; }
+};
+class Base_3_1:virtual public Super_3{
+
+public:
+    virtual void f() {  a=1; }
+    virtual void h1() { ; }
+};
+class Base_3_2:virtual public Super_3{
+public:
+    virtual void f() { a=2; }
+    virtual void h2() { ; }
+};
+class Devired_3 :public Base_3_1,public Base_3_2{
+public:
+    virtual void f() { ; }//不能注释，否则会报重写不明确的错误;
+    virtual void g() { b=3; }
+
+};
+
+void test3(){
+    class Devired_3 d3;
+    d3.f();
+    d3.g();
+
+    cout<<d3.a<<endl;
+    cout<<d3.b<<endl;
+    //d2.g(); 不明确 报错
+}
+
+
+
 int main()
 {
 	test2();
+    test3();
 	return 0;
 }
