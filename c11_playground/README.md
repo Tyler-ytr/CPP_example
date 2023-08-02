@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-08-02 09:48:35
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-02 11:31:26
+ * @LastEditTime: 2023-08-02 11:35:21
  * @FilePath: /CPP_example/c11_playground/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -23,6 +23,8 @@
       2. Devired_3中会额外出现VTT以及两个Construction vtable;Construction vtable里有Devired_3继承的Base_3_1,Base_3_2的虚表信息；经过比对基本一致；里面包含了Base overide的函数以及他们继承的Super的函数；
       3. Devired_3的virtual table中有f,h1,g,h2,h各一份；顺序是先Base_3_1然后Base_3_2然后Super；
       4. 调用顺序：参考该[知乎文章](https://zhuanlan.zhihu.com/p/268324735)；首先Derived对内存初始化，这部分内存存放Super和base的内容，称为内存A；内存A偏移特定字节的位置调用super::super()初始化，然后这里会存放super的虚指针(super_vptr);读取VTT得到Construction vtable位置，实际上是拿到指向Base_3_1虚表里面的第一个虚函数的地址的指针，下面称为 Base1_vptr;调用Base1::Base1() 对内存A进行初始化；在 Base1_vptr - 24，即获取 Base1 虚表的 virtual-base offset，让 Base1_vptr 加上这个 offset 得到 Super 的虚指针;然后根据super_vptr再次更新这块内存；然后进入Base2部分，同理。
+      5. 内存布局可以参考该[CSDN](https://blog.csdn.net/qq_41431406/article/details/84933450);可以看到虚继承多了vbptr;Deirved中的每一个Base都有一个vbptr指向Super
+        
    7. 总结：
       1. 单继承
          1. 虚表中派生类覆盖的虚函数的地址被放在了基类相应的函数原来的位置
