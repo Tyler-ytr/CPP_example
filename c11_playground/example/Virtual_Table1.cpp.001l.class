@@ -1,0 +1,155 @@
+Class __locale_struct
+   size=232 align=8
+   base size=232 base align=8
+__locale_struct (0x0x7f76827c66c0) 0
+
+Vtable for Super_3
+Super_3::_ZTV7Super_3: 5 entries
+0     (int (*)(...))0
+8     (int (*)(...))(& _ZTI7Super_3)
+16    (int (*)(...))Super_3::f
+24    (int (*)(...))Super_3::g
+32    (int (*)(...))Super_3::h
+
+Class Super_3
+   size=16 align=8
+   base size=16 base align=8
+Super_3 (0x0x7f76827c6720) 0
+    vptr=((& Super_3::_ZTV7Super_3) + 16)
+
+Vtable for Base_3_1
+Base_3_1::_ZTV8Base_3_1: 13 entries
+0     8
+8     (int (*)(...))0
+16    (int (*)(...))(& _ZTI8Base_3_1)
+24    (int (*)(...))Base_3_1::f
+32    (int (*)(...))Base_3_1::h1
+40    0
+48    0
+56    18446744073709551608
+64    (int (*)(...))-8
+72    (int (*)(...))(& _ZTI8Base_3_1)
+80    (int (*)(...))Base_3_1::_ZTv0_n24_N8Base_3_11fEv
+88    (int (*)(...))Super_3::g
+96    (int (*)(...))Super_3::h
+
+VTT for Base_3_1
+Base_3_1::_ZTT8Base_3_1: 2 entries
+0     ((& Base_3_1::_ZTV8Base_3_1) + 24)
+8     ((& Base_3_1::_ZTV8Base_3_1) + 80)
+
+Class Base_3_1
+   size=24 align=8
+   base size=8 base align=8
+Base_3_1 (0x0x7f7682809000) 0 nearly-empty
+    vptridx=0 vptr=((& Base_3_1::_ZTV8Base_3_1) + 24)
+  Super_3 (0x0x7f76827c68a0) 8 virtual
+      vptridx=8 vbaseoffset=-24 vptr=((& Base_3_1::_ZTV8Base_3_1) + 80)
+
+Vtable for Base_3_2
+Base_3_2::_ZTV8Base_3_2: 13 entries
+0     8
+8     (int (*)(...))0
+16    (int (*)(...))(& _ZTI8Base_3_2)
+24    (int (*)(...))Base_3_2::f
+32    (int (*)(...))Base_3_2::h2
+40    0
+48    0
+56    18446744073709551608
+64    (int (*)(...))-8
+72    (int (*)(...))(& _ZTI8Base_3_2)
+80    (int (*)(...))Base_3_2::_ZTv0_n24_N8Base_3_21fEv
+88    (int (*)(...))Super_3::g
+96    (int (*)(...))Super_3::h
+
+VTT for Base_3_2
+Base_3_2::_ZTT8Base_3_2: 2 entries
+0     ((& Base_3_2::_ZTV8Base_3_2) + 24)
+8     ((& Base_3_2::_ZTV8Base_3_2) + 80)
+
+Class Base_3_2
+   size=24 align=8
+   base size=8 base align=8
+Base_3_2 (0x0x7f7682809138) 0 nearly-empty
+    vptridx=0 vptr=((& Base_3_2::_ZTV8Base_3_2) + 24)
+  Super_3 (0x0x7f76827c69c0) 8 virtual
+      vptridx=8 vbaseoffset=-24 vptr=((& Base_3_2::_ZTV8Base_3_2) + 80)
+
+Vtable for Devired_3
+Devired_3::_ZTV9Devired_3: 19 entries
+0     16
+8     (int (*)(...))0
+16    (int (*)(...))(& _ZTI9Devired_3)
+24    (int (*)(...))Devired_3::f
+32    (int (*)(...))Base_3_1::h1
+40    (int (*)(...))Devired_3::g
+48    8
+56    (int (*)(...))-8
+64    (int (*)(...))(& _ZTI9Devired_3)
+72    (int (*)(...))Devired_3::_ZThn8_N9Devired_31fEv
+80    (int (*)(...))Base_3_2::h2
+88    0
+96    18446744073709551600
+104   18446744073709551600
+112   (int (*)(...))-16
+120   (int (*)(...))(& _ZTI9Devired_3)
+128   (int (*)(...))Devired_3::_ZTv0_n24_N9Devired_31fEv
+136   (int (*)(...))Devired_3::_ZTv0_n32_N9Devired_31gEv
+144   (int (*)(...))Super_3::h
+
+Construction vtable for Base_3_1 (0x0x7f7682809208 instance) in Devired_3
+Devired_3::_ZTC9Devired_30_8Base_3_1: 13 entries
+0     16
+8     (int (*)(...))0
+16    (int (*)(...))(& _ZTI8Base_3_1)
+24    (int (*)(...))Base_3_1::f
+32    (int (*)(...))Base_3_1::h1
+40    0
+48    0
+56    18446744073709551600
+64    (int (*)(...))-16
+72    (int (*)(...))(& _ZTI8Base_3_1)
+80    (int (*)(...))Base_3_1::_ZTv0_n24_N8Base_3_11fEv
+88    (int (*)(...))Super_3::g
+96    (int (*)(...))Super_3::h
+
+Construction vtable for Base_3_2 (0x0x7f7682809270 instance) in Devired_3
+Devired_3::_ZTC9Devired_38_8Base_3_2: 13 entries
+0     8
+8     (int (*)(...))0
+16    (int (*)(...))(& _ZTI8Base_3_2)
+24    (int (*)(...))Base_3_2::f
+32    (int (*)(...))Base_3_2::h2
+40    0
+48    0
+56    18446744073709551608
+64    (int (*)(...))-8
+72    (int (*)(...))(& _ZTI8Base_3_2)
+80    (int (*)(...))Base_3_2::_ZTv0_n24_N8Base_3_21fEv
+88    (int (*)(...))Super_3::g
+96    (int (*)(...))Super_3::h
+
+VTT for Devired_3
+Devired_3::_ZTT9Devired_3: 7 entries
+0     ((& Devired_3::_ZTV9Devired_3) + 24)
+8     ((& Devired_3::_ZTC9Devired_30_8Base_3_1) + 24)
+16    ((& Devired_3::_ZTC9Devired_30_8Base_3_1) + 80)
+24    ((& Devired_3::_ZTC9Devired_38_8Base_3_2) + 24)
+32    ((& Devired_3::_ZTC9Devired_38_8Base_3_2) + 80)
+40    ((& Devired_3::_ZTV9Devired_3) + 128)
+48    ((& Devired_3::_ZTV9Devired_3) + 72)
+
+Class Devired_3
+   size=32 align=8
+   base size=16 base align=8
+Devired_3 (0x0x7f7682812000) 0
+    vptridx=0 vptr=((& Devired_3::_ZTV9Devired_3) + 24)
+  Base_3_1 (0x0x7f7682809208) 0 nearly-empty
+      primary-for Devired_3 (0x0x7f7682812000)
+      subvttidx=8
+    Super_3 (0x0x7f76827c6ae0) 16 virtual
+        vptridx=40 vbaseoffset=-24 vptr=((& Devired_3::_ZTV9Devired_3) + 128)
+  Base_3_2 (0x0x7f7682809270) 8 nearly-empty
+      subvttidx=24 vptridx=48 vptr=((& Devired_3::_ZTV9Devired_3) + 72)
+    Super_3 (0x0x7f76827c6ae0) alternative-path
+
