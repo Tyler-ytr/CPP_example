@@ -1,10 +1,8 @@
 <!--
- * @Descripttion: 
- * @version: 
  * @Author: tylerytr
  * @Date: 2023-03-27 14:16:52
- * @LastEditTime: 2023-08-02 11:37:06
  * @LastEditors: tylerytr
+ * @LastEditTime: 2023-08-07 15:56:04
  * @FilePath: /CPP_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -14,7 +12,7 @@
 2. skip_list_example 跳表,cmake编译；
 3. multithread_example 
     1. mempool 实现
-    2. C++ thread 一些例子
+    2. multithread_playground C++ thread 一些例子
  4. c11_playground
     1. 虚函数表分析
 ## 附录

@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-04-07 15:57:31
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-07-30 16:56:55
+ * @LastEditTime: 2023-08-07 15:52:51
  * @FilePath: /CPP_example/multithread_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -27,7 +27,7 @@ synchronizes-with关系强调的是变量被修改之后的传播关系（propag
 
 ### C++ 11 内存模型
 1. 支持以下内存模型:
-   ````
+```
    enum memory_order {
     memory_order_relaxed,
     memory_order_consume,
@@ -36,7 +36,7 @@ synchronizes-with关系强调的是变量被修改之后的传播关系（propag
     memory_order_acq_rel,
     memory_order_seq_cst
 };
-   ````
+```
 2. 上述一致性模型可以分为四类，从一致性约束强到一致性约束弱的顺序为:
     1. 顺序一致性:memory_order_seq_cst
     2. Acquire-Release:memory_order_acquire, memory_order_release, memory_order_acq_rel
@@ -60,8 +60,67 @@ synchronizes-with关系强调的是变量被修改之后的传播关系（propag
 
 
 
-## C++ Thread库
-TOBEDONE 
+## C++多线程使用
+### C++多线程相关头文件
+1. C++11 新标准中引入了四个头文件来支持多线程编程，他们分别是`<atomic> ,<thread>,<mutex>,<condition_variable>,<future>`
+   1. `<atomic>`：该头文主要声明了两个类, std::atomic 和 std::atomic_flag，另外还声明了一套 C 风格的原子类型和与 C 兼容的原子操作的函数。
+   2. `<thread>`：该头文件主要声明了 std::thread 类，另外 std::this_thread 命名空间也在该头文件中。
+   3. `<mutex>`：该头文件主要声明了与互斥量(mutex)相关的类，包括 std::mutex 系列类，std::lock_guard, std::unique_lock, 以及其他的类型和函数。C++14/17更新了shared_timed_mutex/shared_mutex;
+   4. `<condition_variable>`：该头文件主要声明了与条件变量相关的类，包括 std::condition_variable 和 std::condition_variable_any。
+   5. `<future>`：该头文件主要声明了 std::promise, std::package_task 两个 Provider 类，以及 std::future 和 std::shared_future 两个 Future 类，另外还有一些与之相关的类型和函数，std::async() 函数就声明在此头文件中。
+
+
+### Thread库
+下文所述，如无另外标记，默认为C++11特性
+1. thread: 创建线程，可以传入(带参)函数，lambda表达式
+#### join与detach
+1. thread类调用join()函数后，原始线程会等待新线程执行完毕之后再去销毁线程对象。
+   thread::join()还会在进程结束后清理子线程相关的内存空间，此后该thread对象不再与该子线程相关，即thread::joinable() = false ,故join对一个线程而言只能调用一次
+2. thread::detach将线程从thread对象分离出来，运行线程独立执行。当主线程结束时，由运行时库负责清理与子线程相关的资源。通常称分离线程为守护线程(daemon threads),UNIX中守护线程是指，没有任何显式的用户接口，并在后台运行的线程。(经过测试，当main()结束的时候，派生的子线程也不在运行)
+   由于detach不像join一样会等待子线程与主线程汇聚，故要注意以下几点:
+   1. 如果传递int这种简单类型，推荐使用值传递，不要用引用
+   2. 如果传递类对象，避免使用隐式类型转换，全部都在创建线程这一行就创建出临时对象，然后在函数参数里，用引用来接，否则还会创建出一个对象。
+#### 线程管理
+1. yield：让出处理器，重新调度各执行线程;通常用在自己的主要任务已经完成的时候，此时希望让出处理器给其他任务使用。
+2. get_id: 返回当前线程的线程 id;可以以此来标识不同的线程。
+3. sleep_for: 是让当前线程停止一段时间。
+4. sleep_until: 使当前线程的执行停止直到指定的时间点
+
+#### 一次调用
+1. call_once：即便在多线程环境下，也能保证只调用某个函数一次
+2. once_flag：与call_once配合使用
+
+### 竞争条件和临界区
+当多个进程或者线程同时访问共享数据时，只要有一个任务会修改数据，那么就可能会发生问题。此时结果依赖于这些任务执行的相对时间，这种场景称为**竞争条件**（race condition）。
+
+访问共享数据的代码片段称之为**临界区**（critical section）。比如04_native_multithread中的sum变量。要避免竞争条件，就需要对临界区进行数据保护。
+
+### mutex库
+#### mutex
+mutex是mutual exclusion（互斥）的简写。
+mutex有如下类型：
+1. mutex：提供基本互斥设施
+2. timed_mutex：提供互斥设施，带有超时功能
+3. recursive_mutex：提供能被同一线程递归锁定的互斥设施
+4. recursive_timed_mutex：提供能被同一线程递归锁定的互斥设施，带有超时功能
+5. shared_timed_mutex(C++14)：提供共享互斥设施并带有超时功能
+6. shared_mutex(C++17)：提供共享互斥设施
+这些类型都提供如下方法：
+1. lock：锁定互斥体，如果不可用，则阻塞
+2. try_lock：尝试锁定互斥体，如果不可用，直接返回
+3. unlock：解锁互斥体
+在这些基础功能上，其他的类进行了如下三方面扩展：
+1. **超时**：`timed_mutex，recursive_timed_mutex，shared_timed_mutex`的名称都带有timed，这意味着它们都支持超时功能。它们都提供了`try_lock_for`和`try_lock_until`方法，这两个方法分别可以指定超时的时间长度和时间点。如果在超时的时间范围内没有能获取到锁，则直接返回，不再继续等待。
+2. **可重入**：`recursive_mutex`和`recursive_timed_mutex`的名称都带有recursive。可重入或者叫做可递归，是指在同一个线程中，同一把锁可以锁定多次。这就避免了一些不必要的死锁。
+3. **共享**：`shared_timed_mutex`和`shared_mutex`提供了共享功能。对于这类互斥体，实际上是提供了两把锁：一把是共享锁，一把是互斥锁。一旦某个线程获取了互斥锁，任何其他线程都无法再获取互斥锁和共享锁；但是如果有某个线程获取到了共享锁，其他线程无法再获取到互斥锁，但是还有获取到共享锁。共享锁通常用在读者写者模型上。 共享锁有如下方法：
+   1. lock_shared：获取互斥体的共享锁，如果无法获取则阻塞
+   2. try_lock_shared：尝试获取共享锁，如果不可用，直接返回
+   3. unlock_shared：解锁共享锁
+
+
+
+
 ### 参考资料
 1. [C++并发编程](https://paul.pub/cpp-concurrency/)
 2. [现代C++教程/并行并发](https://changkun.de/modern-cpp/zh-cn/07-thread/index.html)
+
