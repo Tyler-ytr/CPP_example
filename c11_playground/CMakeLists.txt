@@ -1,7 +1,7 @@
 # CMake entry point
 # 可以批量编译example中的cpp文件；他们的头文件位于include文件夹中
 cmake_minimum_required (VERSION 3.5)
-project (thread-pool)
+project (Cpp_playground)
  
 ## Add headers files
 include_directories (
