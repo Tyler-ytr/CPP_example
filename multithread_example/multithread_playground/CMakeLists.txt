@@ -14,11 +14,12 @@ include_directories (
 
 SET(CMAKE_CXX_FLAGS -pthread)
  
-add_compile_options(
-	-std=c++14
-#        -D_DEBUG
-#        -g
-) 
+# add_compile_options(
+# 	-std=c++17
+# #        -D_DEBUG
+# #        -g
+# ) 
+set(CMAKE_CXX_STANDARD 17)
 
 # 设置头文件路径
 include_directories(include)

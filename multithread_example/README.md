@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-04-07 15:57:31
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-08 10:41:05
+ * @LastEditTime: 2023-08-14 14:19:04
  * @FilePath: /CPP_example/multithread_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -129,17 +129,66 @@ mutex有如下类型：
 
 这些类有以下锁定策略：
 1. defer_lock：类型为 `defer_lock_t`，不获得互斥的所有权
-2. try_to_lock：类型为try_to_lock_t，尝试获得互斥的所有权而不阻塞
-3. adopt_lock：类型为adopt_lock_t，假设调用方已拥有互斥的所有权
+2. try_to_lock：类型为`try_to_lock_t`，尝试获得互斥的所有权而不阻塞
+3. adopt_lock：类型为`adopt_lock_t`，假设调用方已拥有互斥的所有权
 
 通用互斥管理解决的问题是手动的lock和unlock带来的繁琐和易错。标准库基于RAII思想提供了以上API；
 
 ### RAII
+RAII全称是Resource Acquisition Is Initialization，直译过来就是：资源获取即初始化。
+
+RAII会把对象使用前请求的资源的生命周期和对象本身的生命周期绑定。它保证对象存在的时候里面的资源能被访问，并且当对象生命周期结束的时候，资源会按照获取顺序逆序释放。如果某一个资源获取失败，那么以获取的资源也会逆序释放。
+
+RAII 可总结如下:
+1. 将每个资源封装入一个类，其中：
+   1. 构造函数请求资源，并建立所有类不变式，或在它无法完成时抛出异常，
+   2. 析构函数释放资源并决不抛出异常；
+2. 始终经由 RAII 类的实例使用满足要求的资源，该资源
+   1. 自身拥有自动存储期或临时生存期，或
+   2. 具有与自动或临时对象的生存期绑定的生存期
+
+## condition_variable 库
+`<condition_variable>`库提供了以下环境变量：
+1. condition_variable：提供与 std::unique_lock 关联的条件变量
+2. condition_variable_any：提供与任何锁类型关联的条件变量
+3. notify_all_at_thread_exit：安排到在此线程完全结束时对 notify_all 的调用
+4. cv_status：列出条件变量上定时等待的可能结果
+
+condition_variable有以下公共接口：
+1. wait 阻塞
+2. wait_for 阻塞特定时间
+3. wait_until 阻塞到某一个时间点
+4. notify_one 放行一个线程，如果此时托管了多个线程，则随机抽取。
+5. notify_all 放行所有线程。
+6. native_handle 返回原生句柄。
+
+## future 库
+`<future>`库提供了以下API：
+1. async：异步运行一个函数，并返回保有其结果的std::future
+2. future：等待被异步设置的值
+3. packaged_task：打包一个函数，存储其返回值以进行异步获取；(packaged_task绑定到一个函数或者可调用对象上。当它被调用时，它就会调用其绑定的函数或者可调用对象。并且，可以通过与之相关联的future来获取任务的结果。调度程序只需要处理packaged_task，而非各个函数。)
+4. promise：存储一个值以进行异步获取
+5. shared_future：等待被异步设置的值（可能为其他 future 所引用）
+
 
 ## 使用注意点
 ### 线程传参
+1. 线程传参是如果是用detach那么需要考虑主线程先结束，子线程还没有结束的情况；此时传参不建议使用引用，**不可以使用指针**(因为指针传过去的地址会被回收)； 建议使用创建线程的同时构造临时对象的方法传递参数(他可以保证在主线程结束前将myprint()的第二个参数构造出来，隐式类型转换再detach()则不能保证);总而言之，对于detach的thread:
+   1. 若果传递内置类型的变量，建议都是按照值传递，不推荐使用引用，坚决不能用指针
+   2. 如果传递类对象，避免使用隐式类型转换。全部都在创建线程这一行创建出临时对象来，并且在函数参数中使用**引用**来接收参数。
+   3. 除非万不得已！是使用join()就不会出现局部变量失效导致线程对内存非法访问的情形。
+2. 可以使用get_ID()对构造过程进行追踪，根据thread_test_2的结果：
+   1. 当使用隐式类型转换时，临时对象是在**子线程**中被构建的，这就会导致detach()出现问题。（主线程执行完，释放了临时变量可能导致子线程无法构造）
+   2. 当创建线程使用临时对象时，临时对象是在主线程中被构建出来的，这样确保使用子线程不会出问题。
+## 多线程基本模型
+### 生产者消费者模型
 
 
+### 读者写者问题
+
+### 银行家算法
+
+### 哲学家就餐问题
 
 # 参考资料
 1. [C++并发编程](https://paul.pub/cpp-concurrency/)

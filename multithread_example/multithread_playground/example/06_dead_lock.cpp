@@ -39,7 +39,7 @@ public:
     
 
     
-    //为了保证线程安全，在修改每个账号之前，需要获取相应的锁。
+    //为了保证线程安全，在修改每个账号之前，需要获取相应的锁。 下面代码可能会有ABBA死锁
     lock_guard<mutex> guardA(*accountA->getLock());
     lock_guard<mutex> guardB(*accountB->getLock());
     
@@ -47,6 +47,12 @@ public:
     // lock(*accountA->getLock(), *accountB->getLock());//通过lock函数来获取两把锁，标准库的实现会保证不会发生死锁。
     // lock_guard<mutex> guardA(*accountA->getLock(),adopt_lock);//adopt_lock表示这个mutex已经被lock了，不需要再次lock。
     // lock_guard<mutex> guardB(*accountB->getLock(),adopt_lock);
+    //解决死锁方案2:
+    // unique_lock<mutex> lockA(*accountA->getLock(), defer_lock);
+    // unique_lock<mutex> lockB(*accountB->getLock(), defer_lock);
+    // lock(*accountA->getLock(), *accountB->getLock());
+    //解决死锁方案3:
+    //scoped_lock lockAll(*accountA->getLock(), *accountB->getLock());
     
     
     //判断转出账户金额是否足够，如果不够此次转账失败。

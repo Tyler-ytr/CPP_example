@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-08-07 14:15:47
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-09 10:52:41
+ * @LastEditTime: 2023-08-14 14:26:33
  * @FilePath: /CPP_example/multithread_example/multithread_playground/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -123,23 +123,46 @@
                  }
             ```
     8. unique_lock()可以转移所有权但是不能复制所有权。
-            ```
-            //通过移动语义转移所有权
-            std::unique_lock<std::mutex> auto_mutex_1(my_mutex1_);
-            // std::unique_lock<std::mutex> auto_mutex_1(auto_mutex_1); // 直接复制，编译报错
-            std::unique_lock<std::mutex> auto_mutex_2(std::move(auto_mutex_1)); // 左值转右值，调用移动构造函数
-            //通过成员函数返回临时对象
-            std::unique_lock<std::mutex> rtn_unique_lock()
-               {
-               	std::unique_lock<std::mutex> tmpguard(my_mutex1_);
-               	return tmpguard;
-               }
-               // 从一个临时对象来构造新的Foo的话，编译器会优先调用搬移构造函数，来把临时对象开膛破肚，取出自己需要的东西。
-               // 这里本质也是用了移动语义
-               std::unique_lock<std::mutex> auto_mutex_2 = rtn_unique_lock()
-          
-            ```
-  
+      ```
+      //通过移动语义转移所有权
+      std::unique_lock<std::mutex> auto_mutex_1(my_mutex1_);
+      // std::unique_lock<std::mutex> auto_mutex_1(auto_mutex_1); // 直接复制，编译报错
+      std::unique_lock<std::mutex> auto_mutex_2(std::move(auto_mutex_1)); // 左值转右值，调用移动构造函数
+      //通过成员函数返回临时对象
+      std::unique_lock<std::mutex> rtn_unique_lock()
+         {
+         	std::unique_lock<std::mutex> tmpguard(my_mutex1_);
+         	return tmpguard;
+         }
+         // 从一个临时对象来构造新的Foo的话，编译器会优先调用搬移构造函数，来把临时对象开膛破肚，取出自己需要的东西。
+         // 这里本质也是用了移动语义
+         std::unique_lock<std::mutex> auto_mutex_2 = rtn_unique_lock()
+    
+      ```
+8. 09_unique_lock:
+   1. 第一部分以异步的形式启动任务，存在f1这个future对象里面；在wait之后执行完成并输出。需要注意的是async是启动一个新的线程，还是以同步的方式（不启动新的线程）运行任务是标准没有指定的，与编译器相关，可以通过launch::async明确说明(async：运行新线程，以异步执行任务；deferred：调用方线程上第一次请求其结果时才执行任务，即惰性求值。)
+   2. 第二部分使用lambda表达式替代了函数
+   3. 第三部分使用了对象封装。
+9. 10_packaged_task:
+   1.  packaged_task对象是一个可调用对象，它可以被封装成一个std::fucntion，或者作为线程函数传递给std::thread，或者直接调用。
+10. 11_future_promise:
+    1.  future对象只有被一个线程获取值。并且在调用get()之后，就没有可以获取的值了。如果从多个线程调用get()会出现数据竞争，其结果是未定义的。
+# 多线程使用注意点
+1. thread_test_1中测试了detach使用中的线程传参;有两个测试；第一个测试是不安全的线程传参，因为指针指向的地址可能会提前释放；第二个测试是较安全的，建议使用显示类型转换；
+2. thread_test_2中使用get_ID()观察线程创建，传参的过程；参数拷贝次数与编译器有关；目前的g++ 9.4.0版本表现如下;
+  测试2传递临时对象可以看到会发生两次拷贝构造。
+    ```
+   主线程的ID是：140203331639104
+   构造函数被执行0x7ffc1eb91a68创建此对象的ID是：140203331639104
+   Copy构造函数被执行0x7ffc1eb91a20执行copy操作的线程ID是：140203331639104
+   Copy构造函数被执行0x5621a30112c8执行copy操作的线程ID是：140203331639104
+   析构函数被执行0x7ffc1eb91a20执行析构的线程ID是：140203331639104
+   析构函数被执行0x7ffc1eb91a68执行析构的线程ID是：140203331639104
+   子线程的ID是：140203331634944
+   析构函数被执行0x5621a30112c8执行析构的线程ID是：140203331634944
+    ```
+  如果使用ref参数(测试3)那就不会copy出来一份了，也就是实现了引用的真实含义。
+  测试4中是调用类中成员函数的方式，这里需要传递对象进去，可以看到是值传递，这是为了避免detach可能的问题。
 
 # 编译运行方法
 ```
