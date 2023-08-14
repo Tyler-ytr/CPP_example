@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-04-07 15:57:31
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-14 17:33:49
+ * @LastEditTime: 2023-08-14 17:36:08
  * @FilePath: /CPP_example/multithread_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -260,10 +260,15 @@ condition_variable有以下公共接口：
       ```
       见[thread_test_4.cpp](https://github.com/Tyler-ytr/CPP_example/blob/main/multithread_example/multithread_playground/example/thread_test_4.cpp) 执行之后会概率性的segmentation fault;
       > 首先 shared_ptr赋值 a=b有三步，一个步骤是修改裸指针指向(1)，一个步骤是a中指向的控制块的引用计数-1(2)，一个步骤是a根据b指向的控制块赋值自己的控制块指针，并把对应的引用计数+1(3); 下面的控制块计数前面的表示Foo1,后面的表示Foo2;
+      
       > 阶段1:x(null,null);g(Foo1,1);n(Foo2,1);控制块引用计数为1,1
+      
       > 阶段2:x(**Foo1**,null);g(Foo1,1);n(Foo2,1);控制块引用计数为1,1 //x = g 的指针赋值部分(1)
+      
       > 阶段3:x(Foo1,null);g(**Foo2**,1);n(Foo2,1);控制块引用计数为1,1 //g = n 的指针赋值部分(1)
+      
       > 阶段4:x(Foo1,null);g(Foo2,**2**);n(Foo2,**2**);控制块引用计数为**0,2** //g = n 引用计数修改部分(2);导致了Foo1的引用计数为0，此时Foo1会被销毁,x.ptr变成空悬指针;
+      
       > 阶段5:x(Foo1,**3**);g(Foo2,**3**);n(Foo2,**3**);控制块引用计数为**0,2** // x = g 的引用计数修改部分(3); 
 
       原理可以参考[该博客](https://cloud.tencent.com/developer/article/1654442);
