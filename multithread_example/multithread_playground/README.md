@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-08-07 14:15:47
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-14 14:26:33
+ * @LastEditTime: 2023-08-14 17:11:51
  * @FilePath: /CPP_example/multithread_example/multithread_playground/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -163,6 +163,8 @@
     ```
   如果使用ref参数(测试3)那就不会copy出来一份了，也就是实现了引用的真实含义。
   测试4中是调用类中成员函数的方式，这里需要传递对象进去，可以看到是值传递，这是为了避免detach可能的问题。
+3. thread_test_3: 多线程赋值`shared_ptr`指向的地址，预期是*global_instance is 200000000;但是实际情况是不确定的，原因是shared_ptr指向的地址不是线程安全的。
+4. thread_test_4: `shared_ptr` 多线程读写可能会造成空悬指针;进而造成概率性的segmentation fault;
 
 # 编译运行方法
 ```

@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-04-07 15:57:31
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-14 14:19:04
+ * @LastEditTime: 2023-08-14 17:19:10
  * @FilePath: /CPP_example/multithread_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -180,6 +180,91 @@ condition_variable有以下公共接口：
 2. 可以使用get_ID()对构造过程进行追踪，根据thread_test_2的结果：
    1. 当使用隐式类型转换时，临时对象是在**子线程**中被构建的，这就会导致detach()出现问题。（主线程执行完，释放了临时变量可能导致子线程无法构造）
    2. 当创建线程使用临时对象时，临时对象是在主线程中被构建出来的，这样确保使用子线程不会出问题。
+### shared_ptr 线程安全
+1. 线程安全的定义：
+   1. 多个线程同时访问的时候，表现出正确的行为；
+   2. 无论操作系统如何调度这些线程，无论这些线程的执行顺序如何交织
+   3. 调用端代码无须额外的同步或者其他协调动作。
+2. `shared_ptr`有两部分组成：引用计数和原始指针。`shared_ptr`的引用计数本身是安全并且无锁的；多线程环境下，调用不同`shared_ptr`实例的成员函数是不需要额外的同步手段的；**但是**，智能指针的另一个成员，原始指针不是原子的。因此shared_ptr不是线程安全的。
+3. 多线程同时读同一个`shared_ptr`对象是线程安全的，但是如果是多个线程对同一个`shared_ptr`对象进行读和写，则需要加锁。[文档](https://www.boost.org/doc/libs/1_39_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety)案例如下：
+   1. Example 0: 引用计数改变 原子操作 安全
+      ```
+      shared_ptr<int> p(new int(42));
+      ```
+   2. Example 1: 两个线程读 安全
+      ```
+      // thread A
+      shared_ptr<int> p2(p); // reads p
+
+      // thread B
+      shared_ptr<int> p3(p); // OK, multiple reads are safe
+      ```
+   3. Example 2: 两个线程写不同的`shared_ptr` 安全(reset()包含两个操作。当智能指针中有值的时候，调用reset()会使引用计数减1.当调用reset(new xxx())重新赋值时，智能指针首先是生成新对象，然后将就对象的引用计数减1（当然，如果发现引用计数为0时，则析构旧对象），然后将新对象的指针交给智能指针保管)
+      ```
+      // thread A
+      p.reset(new int(1912)); // writes p
+
+      // thread B
+      p2.reset(); // OK, writes p2
+      ```
+   4. Example 3: 两个线程读写一个`shared_ptr` 不安全：
+      ```
+      // thread A
+      p = p3; // reads p3, writes p
+
+      // thread B
+      p3.reset(); // writes p3; undefined, simultaneous read/write
+      ```
+      y=x操作涉及到两个成员的操作，也就是`shared_ptr`中裸指针的赋值和引用计数的变化，如果没有mutex那么多线程就有race condition
+   5. Example 4: 两个线程读/销毁一个`shared_ptr` 不安全；
+      ```
+      // thread A
+      p3 = p2; // reads p2, writes p3
+
+      // thread B
+      // p2 goes out of scope: undefined, the destructor is considered a "write access"
+
+      ```
+   6. Example 5: 两个线程同时写一个`shared_ptr` 不安全
+      ```
+      // thread A
+      p3.reset(new int(1));
+
+      // thread B
+      p3.reset(new int(2)); // undefined, multiple writes
+      
+      ```
+4. 多线程无保护写可能会出现race condition:
+   1. 以下场景: 有 3 个 `shared_ptr<Foo>`对象 x、g、n：
+      ```
+      shared_ptr<Foo> g(new Foo1); // 线程之间共享的 shared_ptr
+      shared_ptr<Foo> x; // 线程 A 的局部变量
+      shared_ptr<Foo> n(new Foo2); // 线程 B 的局部变量
+      -------------------------------------------
+      线程 A
+      x = g; （即 read g） //代码1 :赋值指针,赋值 引用计数
+      -------------------------------------------
+      线程 B
+      g = n;//代码2 :动作A 清空原来G指向Foo1, 动作B 然后重新赋值 Foo2
+
+      测试场景：
+
+      线程A 
+        智能指针x 读取Foo1,然后还重置Foo1计数。
+
+      线程 B:
+       销毁了Foo1
+      线程A
+      重置计数是，foo1已经被销毁。
+      
+      ```
+      见thread_test_4.cpp 执行之后会概率性的segmentation fault;
+      原理可以参考[该博客](https://cloud.tencent.com/developer/article/1654442)
+
+
+
+### 互斥锁自旋锁的应用场景
+
 ## 多线程基本模型
 ### 生产者消费者模型
 
