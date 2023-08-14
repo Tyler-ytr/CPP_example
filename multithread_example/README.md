@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-04-07 15:57:31
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-14 17:19:10
+ * @LastEditTime: 2023-08-14 17:33:49
  * @FilePath: /CPP_example/multithread_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -185,7 +185,7 @@ condition_variable有以下公共接口：
    1. 多个线程同时访问的时候，表现出正确的行为；
    2. 无论操作系统如何调度这些线程，无论这些线程的执行顺序如何交织
    3. 调用端代码无须额外的同步或者其他协调动作。
-2. `shared_ptr`有两部分组成：引用计数和原始指针。`shared_ptr`的引用计数本身是安全并且无锁的；多线程环境下，调用不同`shared_ptr`实例的成员函数是不需要额外的同步手段的；**但是**，智能指针的另一个成员，原始指针不是原子的。因此shared_ptr不是线程安全的。
+2. `shared_ptr`有两部分组成：引用计数(指向控制块的指针)和原始指针。`shared_ptr`的引用计数本身是安全并且无锁的；多线程环境下，调用不同`shared_ptr`实例的成员函数是不需要额外的同步手段的；**但是**，智能指针的另一个成员，原始指针不是原子的。因此shared_ptr不是线程安全的。
 3. 多线程同时读同一个`shared_ptr`对象是线程安全的，但是如果是多个线程对同一个`shared_ptr`对象进行读和写，则需要加锁。[文档](https://www.boost.org/doc/libs/1_39_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety)案例如下：
    1. Example 0: 引用计数改变 原子操作 安全
       ```
@@ -258,8 +258,16 @@ condition_variable有以下公共接口：
       重置计数是，foo1已经被销毁。
       
       ```
-      见thread_test_4.cpp 执行之后会概率性的segmentation fault;
-      原理可以参考[该博客](https://cloud.tencent.com/developer/article/1654442)
+      见[thread_test_4.cpp](https://github.com/Tyler-ytr/CPP_example/blob/main/multithread_example/multithread_playground/example/thread_test_4.cpp) 执行之后会概率性的segmentation fault;
+      > 首先 shared_ptr赋值 a=b有三步，一个步骤是修改裸指针指向(1)，一个步骤是a中指向的控制块的引用计数-1(2)，一个步骤是a根据b指向的控制块赋值自己的控制块指针，并把对应的引用计数+1(3); 下面的控制块计数前面的表示Foo1,后面的表示Foo2;
+      > 阶段1:x(null,null);g(Foo1,1);n(Foo2,1);控制块引用计数为1,1
+      > 阶段2:x(**Foo1**,null);g(Foo1,1);n(Foo2,1);控制块引用计数为1,1 //x = g 的指针赋值部分(1)
+      > 阶段3:x(Foo1,null);g(**Foo2**,1);n(Foo2,1);控制块引用计数为1,1 //g = n 的指针赋值部分(1)
+      > 阶段4:x(Foo1,null);g(Foo2,**2**);n(Foo2,**2**);控制块引用计数为**0,2** //g = n 引用计数修改部分(2);导致了Foo1的引用计数为0，此时Foo1会被销毁,x.ptr变成空悬指针;
+      > 阶段5:x(Foo1,**3**);g(Foo2,**3**);n(Foo2,**3**);控制块引用计数为**0,2** // x = g 的引用计数修改部分(3); 
+
+      原理可以参考[该博客](https://cloud.tencent.com/developer/article/1654442);
+
 
 
 
