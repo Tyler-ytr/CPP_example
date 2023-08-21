@@ -1,3 +1,12 @@
+<!--
+ * @Author: tylerytr
+ * @Date: 2023-08-20 22:41:46
+ * @LastEditors: tylerytr
+ * @LastEditTime: 2023-08-21 15:43:39
+ * @FilePath: /CPP_example/cpp_server_example/README.md
+ * Email:601576661@qq.com
+ * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
+-->
 # CPP 服务器
 用于输出socket以及epoll的积累
 ## epoll使用
@@ -77,7 +86,13 @@
 
 
 ## CPP tcp server 简化版本
-### 
+1. example中实现了tcp server和tcp client;
+2. tcp server中: 
+   1. 首先是创建套接字，设置地址端口并绑定;监听;这部分流程可以参考[我之前的总结](https://tyler-ytr.github.io/2022/10/19/socket-learning/#%E6%9C%8D%E5%8A%A1%E7%AB%AF)
+   2. 然后创建一个epoll;把socket包装成一个epoll_event对象，通过epoll_ctl添加到epoll中;创建回调事件数组;
+   3. 在死循环中通过epoll_wait获得响应事件;
+      1. 如果该事件的fd为socketfd;说明这是一个新连接;通过accept函数得到接受的fd;如果成功的话设置对应的响应事件然后通过epoll_ctl添加到epoll中
+      2. 如果不是，说明要么是断开或者连接出错；要么是已有连接；对于断开/出错，通过epoll_ctl删除;对于可读事件，通过read读取然后往客户端写数据;
 
 
 # 参考
@@ -87,3 +102,4 @@
 4. [30天服务器](https://github.com/yuesong-feng/30dayMakeCppServer)
 5. [openonload](https://github.com/Xilinx-CNS/onload)
 6. [Linux内核之epoll模型](https://github.com/0voice/linux_kernel_wiki/blob/main/%E6%96%87%E7%AB%A0/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E6%A0%88/Linux%E5%86%85%E6%A0%B8%E4%B9%8Bepoll%E6%A8%A1%E5%9E%8B.md)
+7. [socket客户端服务端](https://blog.csdn.net/abcd552191868/article/details/122398762)
