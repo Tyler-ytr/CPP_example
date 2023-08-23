@@ -8,16 +8,18 @@
 
 using namespace std;
 
+#define SERVER_PORT  8088  //服务器端口
+#define MAXLEN  4096 //缓冲区最大大小
 
 int main(){
     const int EVENTS_SIZE = 20;
     //读socket的数组
-    char buff[1024];
+    char buff[MAXLEN];
     //创建一个tcp socket
     int socketFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     //设置socket监听的地址和端口
     sockaddr_in sockAddr{};
-    sockAddr.sin_port = htons(8088);
+    sockAddr.sin_port = htons(SERVER_PORT);
     sockAddr.sin_family = AF_INET;
     sockAddr.sin_addr.s_addr = htons(INADDR_ANY);
     //绑定socket
@@ -69,12 +71,12 @@ int main(){
                         epev.events = EPOLLIN | EPOLLET;
                         epev.data.fd = fd;
                         //设置连接为非阻塞模式
-                        int flags = fcntl(fd, F_GETFL, 0);
+                        int flags = fcntl(fd, F_GETFL, 0);//F_GETFL 表示读取文件状态标志
                         if (flags < 0) {
                             cout << "set no block error, fd:" << fd << endl;
                             continue;
                         }
-                        if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+                        if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {//F_SETFL 设置文件状态标志
                             cout << "set no block error, fd:" << fd << endl;
                             continue;
                         }

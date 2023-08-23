@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-08-20 22:41:46
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-21 15:48:48
+ * @LastEditTime: 2023-08-23 16:57:18
  * @FilePath: /CPP_example/cpp_server_example/IO_multiplexing_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -86,13 +86,61 @@
 
 
 ## CPP tcp server 简化版本
-1. example中实现了tcp server和tcp client;
+### tcp client 
+1. example 中实现了tcp_client_example
+2. tcp_client中：
+   1. 创建套接字对象，通过connect请求连接到socketfd;然后在死循环中通过send发`"this is from client message!"`
+### tcp socket server
+1. tcp_socket_server_example.cpp中实现了基本的socket 收发功能；只能够接受一个客户端的信息
+2. tcp_socket_server_multi_example.cpp中通过多线程能够接受多个客户端的信息，优点是结构简单，缺点是不适用高并发情况(一个线程8M,4G内存，最多512个线程（仅仅是线程就占用了4个G)
+
+
+### tcp select server
+1. 使用select完成IO多路复用,案例位于tcp_socket_server_example.cpp
+2. select接口如下:
+      ```
+         #include <sys/select.h>
+         //readfds、writefds、errorfds 是三个文件描述符集合。select 会遍历每个集合的前 nfds 个描述符，分别找到可以读取、可以写入、发生错误的描述符，统称为“就绪”的描述符。然后用找到的子集替换这三个引用参数中的对应集合，返回所有就绪描述符的数量。
+         int select(
+          int nfds,                     // 监控的文件描述符集里最大文件描述符加1
+          fd_set *readfds,              // 监控有读数据到达文件描述符集合，引用类型的参数
+          fd_set *writefds,             // 监控写数据到达文件描述符集合，引用类型的参数
+          fd_set *exceptfds,            // 监控异常发生达文件描述符集合，引用类型的参数
+          struct timeval *timeout);     // 定时阻塞监控时间
+
+         int FD_ZERO(int fd, fd_set *fdset);  // 将 fd_set 所有位置 0
+         int FD_CLR(int fd, fd_set *fdset);   // 将 fd_set 某一位置 0
+         int FD_SET(int fd, fd_set *fd_set);  // 将 fd_set 某一位置 1
+         int FD_ISSET(int fd, fd_set *fdset); // 检测 fd_set 某一位是否为 1
+      
+      ```
+3. select实现有以下缺点:
+   1. 性能开销大
+      1. 调用 select 时会陷入内核，这时需要将参数中的 fd_set 从用户空间拷贝到内核空间，select 执行完后，还需要将 fd_set 从内核空间拷贝回用户空间，高并发场景下这样的拷贝会消耗极大资源；（epoll 优化为不拷贝）
+      2. 进程被唤醒后，不知道哪些连接已就绪即收到了数据，需要遍历传递进来的所有 fd_set 的每一位，不管它们是否就绪；（epoll 优化为异步事件通知）
+      3. select 只返回就绪文件的个数，具体哪个文件可读还需要遍历；（epoll 优化为只返回就绪的文件描述符，无需做无效的遍历）
+   2. 同时能够监听的文件描述符数量太少。受限于 sizeof(fd_set) 的大小，在编译内核时就确定了且无法更改。一般是 32 位操作系统是 1024，64 位是 2048。（poll、epoll 优化为适应链表方式）
+
+### tcp poll server
+1. 使用select完成IO多路复用,案例位于tcp_poll_server_example.cpp
+2. 和 select 类似，只是描述 fd 集合的方式不同，poll 使用 pollfd 结构而非 select 的 fd_set 结构。管理多个描述符也是进行轮询，根据描述符的状态进行处理，但 poll 无最大文件描述符数量的限制，因其基于链表存储。
+      ```
+         struct pollfd {
+          int fd;           // 要监听的文件描述符
+          short events;     // 要监听的事件
+          short revents;    // 文件描述符fd上实际发生的事件
+         };
+      ```
+3. select 和 poll 在内部机制方面并没有太大的差异。相比于 select 机制，poll 只是取消了最大监控文件描述符数限制，并没有从根本上解决 select 存在的问题。
+### tcp epoll server
+1. example中实现了tcp_epoll_server_example;
 2. tcp server中: 
    1. 首先是创建套接字，设置地址端口并绑定;监听;这部分流程可以参考[我之前的总结](https://tyler-ytr.github.io/2022/10/19/socket-learning/#%E6%9C%8D%E5%8A%A1%E7%AB%AF)
    2. 然后创建一个epoll;把socket包装成一个epoll_event对象，通过epoll_ctl添加到epoll中;创建回调事件数组;
    3. 在死循环中通过epoll_wait获得响应事件;
-      1. 如果该事件的fd为socketfd;说明这是一个新连接;通过accept函数得到接受的fd;如果成功的话设置对应的响应事件然后通过epoll_ctl添加到epoll中
+      1. 如果该事件的fd为socketfd;说明这是一个新连接;通过accept函数得到接受的fd;如果成功的话设置对应的响应事件然后通过epoll_ctl添加到epoll中;另外通过fcntl把fd设置成非阻塞I/O模式;
       2. 如果不是，说明要么是断开或者连接出错；要么是已有连接；对于断开/出错，通过epoll_ctl删除;对于可读事件，通过read读取然后往客户端写数据;
+
 
 
 # 参考
@@ -103,3 +151,5 @@
 5. [openonload](https://github.com/Xilinx-CNS/onload)
 6. [Linux内核之epoll模型](https://github.com/0voice/linux_kernel_wiki/blob/main/%E6%96%87%E7%AB%A0/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE%E6%A0%88/Linux%E5%86%85%E6%A0%B8%E4%B9%8Bepoll%E6%A8%A1%E5%9E%8B.md)
 7. [socket客户端服务端](https://blog.csdn.net/abcd552191868/article/details/122398762)
+8. [UNIX网络编程——fcntl函数](https://blog.51cto.com/u_15127629/4105853?articleABtest=1)
+9. [深入学习IO多路复用 select/poll/epoll 实现原理](https://www.cnblogs.com/88223100/p/Deeply-learn-the-implementation-principle-of-IO-multiplexing-select_poll_epoll.html)

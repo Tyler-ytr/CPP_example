@@ -2,8 +2,8 @@
  * @Author: tylerytr
  * @Date: 2023-08-21 15:17:05
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-21 15:31:08
- * @FilePath: /CPP_example/cpp_server_example/example/tcpclient_example.cpp
+ * @LastEditTime: 2023-08-23 15:01:37
+ * @FilePath: /CPP_example/cpp_server_example/IO_multiplexing_example/example/tcp_client_example.cpp
  * @Email:601576661@qq.com
  * @Copyright (c) 2023 by tyleryin, All Rights Reserved. 
  */
@@ -39,21 +39,24 @@ int main(){
     
         const char *message = "this is from client message!";
         ret = send(socketfd, message, strlen(message), 0);
+        printf("ret :%d\n", ret);
         
-        if(ret > 0){
-            char recvbuf[MAXLEN] = {0}; 
-            ret = recv(socketfd, recvbuf, MAXLEN, 0);
-            if(ret > 0){
-                printf("recv message from server:%s\n", recvbuf);
-            }else if(ret == 0){
-                printf("server has closed!\n");
-                close(socketfd);
-            } 
-            else{
-                printf("recv error :%d\n", errno);
-                close(socketfd);
-            }
-        }
+
+        //对于epoll server解除注释，接受服务器信息；
+        // if(ret > 0){
+        //     char recvbuf[MAXLEN] = {0}; 
+        //     ret = recv(socketfd, recvbuf, MAXLEN, 0);
+        //     if(ret > 0){
+        //         printf("recv message from server:%s\n", recvbuf);
+        //     }else if(ret == 0){
+        //         printf("server has closed!\n");
+        //         close(socketfd);
+        //     } 
+        //     else{
+        //         printf("recv error :%d\n", errno);
+        //         close(socketfd);
+        //     }
+        // }
         sleep(1);
     }
 
