@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-08-20 22:41:46
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-08-23 16:57:18
+ * @LastEditTime: 2023-08-23 17:15:32
  * @FilePath: /CPP_example/cpp_server_example/IO_multiplexing_example/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -17,17 +17,17 @@
 1. [eventpoll结构体](https://www.cnblogs.com/mysky007/p/12284842.html)中包含了:
    1. 自旋锁 lock: 用于保护对于这个结构体的访问
    2. mutex用来保证epoll使用文件的时候文件不会被删除
-   3. wait_queue_head_t wq; 这个队列里存放的是执行epoll_wait从而等待的进程队列
+   3. wait_queue_head_t wq; 这个队列里存放的是执行epoll_wait从而等待的进程队列；有数据到达的时候，epoll_wait会通过回调函数default_wake_function唤醒
    4. wait_queue_head_t poll_wait; 这个队列里存放的是该eventloop作为poll对象的一个实例，加入到等待的队列
-   5. struct list_head **rdllist**; 双链表中则存放着将要通过epoll_wait返回给用户的满足条件的事件
-   6. struct rb_root_cached **rbr**; 红黑树的根节点，这颗树中存储着所有添加到epoll中的需要监控的事件
+   5. struct list_head **rdllist**; 就绪的描述符的链表。当有的连接数据就绪的时候，内核会把就绪的连接放到 rdllist 链表里。这样应用进程只需要判断链表就能找出就绪进程，而不用去遍历整棵树。
+   6. struct rb_root_cached **rbr**; 红黑树的根节点，这颗树中存储着所有添加到epoll中的需要监控的事件；红黑树的值为epitem中的sockfd
    7. struct epitem *ovflist; 
    8. struct wakeup_source *ws; wakeup_source used when ep_scan_ready_list is running
    9. struct user_struct *user; The user that created the eventpoll descriptor
-   10. struct file *file 这是eventloop对应的匿名文件
-   11. int visited; used to optimize loop detection check 
-   12. struct list_head visited_list_link;
-   13. unsigned int napi_id;（#ifdef CONFIG_NET_RX_BUSY_POLL） /* used to track busy poll napi_id */
+   4.  struct file *file 这是eventloop对应的匿名文件
+   5.  int visited; used to optimize loop detection check 
+   6.  struct list_head visited_list_link;
+   7.  unsigned int napi_id;（#ifdef CONFIG_NET_RX_BUSY_POLL） /* used to track busy poll napi_id */
 2. [epitem结构体] 这是红黑树的节点，也是双向链表的节点;
     1. **rbn** 红黑树节点
     2. **rdllink**;next 双向链表头以及指针
@@ -84,6 +84,17 @@
    2. events: 长度是maxevents;  表示本次`epoll_wait`调用准备好的读写事件;
    3. 参数timeout：阻塞等待的时长
 
+4. epoll_event_callback() 上述三个接口是用户的系统调用；本接口由操作系统进行操作；会在如下五种情况下触发;大概的含义是根据TCP给定的socketid从红黑树找到节点然后根据情况(epitem的rdy)来决定是否加入到双向链表以及是否修改rdy;
+   1. 客户端connect()连入，服务器处于SYN_RCVD状态时
+   2. 三次握手完成，服务器处于ESTABLISHED状态时
+   3. 客户端close()断开连接，服务器处于FIN_WAIT_1和FIN_WAIT_2状态时
+   4. 客户端send/write()数据，服务器可读时
+   5. 服务器可以发送数据时
+5. epoll底层实现中有两个关键的数据结构，一个是eventpoll另一个是epitem，其中eventpoll中有两个成员变量分别是rbr和rdlist,前者指向一颗红黑树的根，后者指向双向链表的头。而epitem则是红黑树节点和双向链表节点的综合体，也就是说epitem即可作为树的节点，又可以作为链表的节点，并且epitem中包含着用户注册的事件。使用epoll的主要流程如下:
+   1. 当用户调用epoll_create()时，会创建eventpoll对象（包含一个红黑树和一个双链表）；
+   2. 而用户调用epoll_ctl(ADD)时，会在红黑树上增加节点（epitem对象）；
+   3. 接下来，操作系统会默默地在通过epoll_event_callback()来管理eventpoll对象。当有事件被触发时，操作系统则会调用epoll_event_callback函数，将含有该事件的epitem添加到双向链表中。
+   4. 当用户需要管理连接时，只需通过epoll_wait()从eventpoll对象中的双链表下"摘取"epitem并取出其包含的事件即可。
 
 ## CPP tcp server 简化版本
 ### tcp client 
@@ -134,7 +145,11 @@
 3. select 和 poll 在内部机制方面并没有太大的差异。相比于 select 机制，poll 只是取消了最大监控文件描述符数限制，并没有从根本上解决 select 存在的问题。
 ### tcp epoll server
 1. example中实现了tcp_epoll_server_example;
-2. tcp server中: 
+2. epoll 的特点是：
+   1. 使用红黑树存储一份文件描述符集合，每个文件描述符只需在添加时传入一次，无需用户每次都重新传入；—— 解决了 select 中 fd_set 重复拷贝到内核的问题
+   2. 通过异步 IO 事件找到就绪的文件描述符，而不是通过轮询的方式；
+   3. 使用队列存储就绪的文件描述符，且会按需返回就绪的文件描述符，无须再次遍历；
+3. tcp server中: 
    1. 首先是创建套接字，设置地址端口并绑定;监听;这部分流程可以参考[我之前的总结](https://tyler-ytr.github.io/2022/10/19/socket-learning/#%E6%9C%8D%E5%8A%A1%E7%AB%AF)
    2. 然后创建一个epoll;把socket包装成一个epoll_event对象，通过epoll_ctl添加到epoll中;创建回调事件数组;
    3. 在死循环中通过epoll_wait获得响应事件;
