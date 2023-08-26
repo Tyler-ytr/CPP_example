@@ -10,6 +10,7 @@
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
 -->
 # Skip_list
+skil_list文件夹中实现了跳表，通过模板支持任意的类型
 
 1. 跳表是一个可以快速查找的有序链表, 搜索、插入、删除操作的时间均为O(logn);(因为链表的随机查找性能是O(n));
 2. **跳表节点**,具有key,value以及一个next数组，用来存储节点在所有层数的下一个节点;**跳表**需要存储头节点，maxlevel以及对外提供插入查找删除打印等操作。
