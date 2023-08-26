@@ -72,7 +72,7 @@ template<class T>int SkipList<T>::nodeLevel(std::vector<SkipNode<T>*> next){
 /*
     插入:
     1. 首先用查找函数判断这个函数是否存在，如果存在的话就更新该节点的值
-    2. 获取新节点的随即层数
+    2. 获取新节点的随机层数
     3. 找到合适的插入位置
     4. 插入，调整每层前后的指针
 */
@@ -90,10 +90,12 @@ template<class T>SkipNode<T>*SkipList<T>:: insert(int key,T value){
     int x_level=randomLevel();
     cout << "key: " << key  << ", randomLevel: " << x_level << endl;
     newNode=new SkipNode<T>(key,value,x_level);
+    //逐层找到下一个节点
     for(int i=x_level-1;i>=0;i--){
         while(tmp->next[i]!=nullptr&&tmp->next[i]->key<key){
             tmp=tmp->next[i];
         }
+        //逐层插入
         newNode->next[i]=tmp->next[i];
         tmp->next[i]=newNode;
     }

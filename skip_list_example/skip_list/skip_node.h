@@ -15,7 +15,7 @@ template <typename T=int>
 struct SkipNode{
     int key;
     T value;
-    std::vector<SkipNode*> next;
+    std::vector<SkipNode*> next;//用于存储结点在所有层数上的下一个结点。
 
     SkipNode(int k,T v,int level);
 };
