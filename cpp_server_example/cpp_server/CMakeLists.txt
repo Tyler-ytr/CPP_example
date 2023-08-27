@@ -11,5 +11,5 @@ include_directories(
 )
 
 # 添加可执行文件
-add_executable(client example/client.cpp example/common.cpp)
-add_executable(server example/server.cpp example/common.cpp)
+add_executable(client example/common.cpp example/client.cpp )
+add_executable(server example/common.cpp example/server.cpp example/inetaddress.cpp example/socket.cpp example/epoll.cpp)
