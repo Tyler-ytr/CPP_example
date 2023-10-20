@@ -2,7 +2,7 @@
  * @Author: tylerytr
  * @Date: 2023-08-02 09:48:35
  * @LastEditors: tylerytr
- * @LastEditTime: 2023-10-16 16:47:45
+ * @LastEditTime: 2023-10-20 17:21:48
  * @FilePath: /stl_playground/README.md
  * Email:601576661@qq.com
  * Copyright (c) 2023 by tyleryin, All Rights Reserved. 
@@ -42,7 +42,12 @@ lambda仿函数原理
      比如，any不用通过`any<someType>x=y`来赋值，而是通过`any x=y`来赋值; function也不用考虑它的类型;
      
 ## UniquePtr
-TOBEDONE     
+1. test_unique_ptr_1.cpp:实现了各种构造函数的调用
+2. uniqueptr独享指向的对象，同时只有一个uniqueptr指向同一个同一个对象，当这个unique_ptr被销毁的时候指向的对象也会被销毁；它的实现原理：
+     1. 构造的时候传入托管对象的指针(以及delete方法)，析构的时候delete对象
+     2. 禁用赋值函数（因此只能move）
+3. 在test_unique_ptr_2.cpp中实现了对于自定义uniqueptr类stl_uniqueptr.hpp的简易测试；
+
 
 # 参考
 1. [类型擦除相关的博客](https://www.cnblogs.com/muxue/archive/2009/12/10/1621451.html)
